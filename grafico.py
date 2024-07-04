@@ -13,26 +13,32 @@ def imprimir_cuadricula(matrix):
             fila += matrix[i][j] + " "
         print(fila)
 
-def insertar_obstaculos(matrix, obstaculos):
-    for obstaculo in obstaculos:
-        i, j = obstaculo
-        if 0 <= i < len(matrix) and 0 <= j < len(matrix[0]):
-            matrix[i][j] = 'X'
+def insertar_inicio_fin(matrix): 
+    x_inicio = int(input("Ingrese la coordenada x del inicio: "))
+    y_inicio = int(input("Ingrese la coordenada y del inicio: "))
+    if 0 <= x_inicio < len(matrix) and 0 <= y_inicio < len(matrix[0]):
+            matrix[x_inicio][y_inicio] = 'S'
+
+    x_fin = int(input("Ingrese la coordenada x del fin: "))
+    y_fin = int(input("Ingrese la coordenada y del fin: "))
+    if 0 <= x_fin < len(matrix) and 0 <= y_fin < len(matrix[0]):
+            matrix[x_fin][y_fin] = 'D'
+
+def insertar_obstaculos(matrix):
+    num_obstaculos = int(input("¿Cuántos obstáculos desea insertar? "))
+    for _ in range(num_obstaculos):
+        x = int(input("Ingrese la coordenada x del obstáculo: "))
+        y = int(input("Ingrese la coordenada y del obstáculo: "))
+        if 0 <= x < len(matrix) and 0 <= y < len(matrix[0]):
+            matrix[x][y] = 'X'
+
+
 
 n = int(input("Inserte el numero de matriz:"))
 # Generar la matriz vacía
 matrix = generate_empty_matrix(n)
-
-num_obstaculos = int(input("¿Cuántos obstáculos desea insertar? "))
-# Pedir al usuario las coordenadas de los obstáculos
-obstaculos = []
-for _ in range(num_obstaculos):
-    x = int(input("Ingrese la coordenada x del obstáculo: "))
-    y = int(input("Ingrese la coordenada y del obstáculo: "))
-    obstaculos.append((x, y))
-
-# Insertar los obstáculos en la matriz
-insertar_obstaculos(matrix, obstaculos)
-# Imprimir la cuadrícula con los obstáculos
+imprimir_cuadricula(matrix)
+insertar_inicio_fin(matrix)
+insertar_obstaculos(matrix)
 imprimir_cuadricula(matrix)
 
