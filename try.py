@@ -1,5 +1,5 @@
 import sys 
-def generate_empty_matrix(n):
+def generar_empty_matrix(n):
     return [['.' for _ in range(n)] for _ in range(n)]
 
 def imprimir_cuadricula(matrix):
@@ -34,57 +34,62 @@ def insertar_obstaculos(matrix):
         if 0 <= x < len(matrix) and 0 <= y < len(matrix[0]):
             matrix[x][y] = 'X'
 
-def generate_matrix(num_vertices,edges): 
+def generar_matrix(num_vertices,aristas): 
     matrix = [[0 for _ in range(num_vertices)] for _ in range(num_vertices)]
-    for edge in edges:
-        i, j = edge
+    for arista in aristas:
+        i, j = arista
         matrix[i][j] = 1
         matrix[j][i] = 1
     return matrix
 
-def minDistance(distance, shortPathSet):
-    min_distance = sys.maxsize 
-    min_index = -1 
+def mindistancia(distancia, shortPathSet):
+    min_distancia = sys.maxsize #Sirve para asegurar que todos los vertices procesados sean menores
+    min_index = -1 #Sirve para que despues de la iteracion se devuelva el menor valor para confirmar que se haya recorrido todos los vertices con valores positivos
 
-    for vertex in range(len(distance)):
-        if distance[vertex] < min_distance and not shortPathSet[vertex]:
-            min_distance = distance[vertex]
-            min_index = vertex 
+    for vertice in range(len(distancia)):
+        if distancia[vertice] < min_distancia and not shortPathSet[vertice]: #Confirma si la distancia del vertice actual es menor que infinito y no esta dentro del arbol de caminos cortos
+            min_distancia = distancia[vertice] #esa distancia recorrida se convierte en la minima distancia que se ha visitado
+            min_index = vertice #se actualiza el vertice como el minimo visitado 
     return min_index
 
-def dijkstra(num_vertices, graph, source):
-    distance = [sys.maxsize] * num_vertices
-    distance[source] = 0 
-    shortPathSet = [False] * num_vertices
-    predecessor = [-1] * num_vertices
+def dijkstra(num_vertices, grafo, source):
+    distancia = [sys.maxsize] * num_vertices #Se asigna un valor inicial como infinito a la distancia con todos los vertices
+    distancia[source] = 0 #Se asume que la distancia desde el primer vertice consigo mismo es O 
+    shortPathSet = [False] * num_vertices #Inicialmente no se incluye los vertices al arbol
+    predecessor = [-1] * num_vertices #en este caso es escencial el uso de precesores para construir el camino mas corto desde el origen, se parte del nodo destino y seguimos los predecesores hasta el origen
     for _ in range(num_vertices):
-        min_vertex = minDistance(distance, shortPathSet)
-        shortPathSet[min_vertex] = True
-        for current_vertex in range(num_vertices):
-            if graph[min_vertex][current_vertex] > 0 and not shortPathSet[current_vertex] and \
-                distance[current_vertex] > distance[min_vertex] + graph[min_vertex][current_vertex]:
-                distance[current_vertex] = distance[min_vertex] + graph[min_vertex][current_vertex]
-                predecessor[current_vertex] = min_vertex 
+        min_vertice = mindistancia(distancia, shortPathSet) #Escoge al vertice con la menor distancia
+        shortPathSet[min_vertice] = True #Agrega al arbol de caminos 
+        for actual_vertice in range(num_vertices):
+            #verifica si entre el minimo valor procesado y el que esta siendo procesado existe una arista,
+            # que sera mayor que cero en una matriz de adyacencia; y que ese nodo no este todavia en el arbol de caminos
+            # la otra condicion verifica si la distancia calculada de origen al actual vertice a traves de min vertice 
+            # es menor que la distancia anterior o actual conocida para luego actualizar si es de ser asi
+            if grafo[min_vertice][actual_vertice] > 0 and not shortPathSet[actual_vertice] and \
+                distancia[actual_vertice] > distancia[min_vertice] + grafo[min_vertice][actual_vertice]:
+                distancia[actual_vertice] = distancia[min_vertice] + grafo[min_vertice][actual_vertice]
+                predecessor[actual_vertice] = min_vertice 
+#
+    return distancia, predecessor
 
-    return distance, predecessor
-
-def obtener_vertices_edges(matrix):
+def obtener_vertices_aristas(matrix):
+    #esta funcion fue agregada para contruir las aristas entre los vertices al 
     vertices = []
-    edges = []
+    aristas = []
     n = len(matrix)
     for i in range(n):
         for j in range(n):
             if matrix[i][j] != 'X':
                 vertices.append((i, j))
                 if i > 0 and matrix[i-1][j] != 'X':
-                    edges.append(((i, j), (i-1, j)))
+                    aristas.append(((i, j), (i-1, j)))
                 if i < n-1 and matrix[i+1][j] != 'X':
-                    edges.append(((i, j), (i+1, j)))
+                    aristas.append(((i, j), (i+1, j)))
                 if j > 0 and matrix[i][j-1] != 'X':
-                    edges.append(((i, j), (i, j-1)))
+                    aristas.append(((i, j), (i, j-1)))
                 if j < n-1 and matrix[i][j+1] != 'X':
-                    edges.append(((i, j), (i, j+1)))
-    return vertices, edges
+                    aristas.append(((i, j), (i, j+1)))
+    return vertices, aristas
 
 def convertir_a_indice(vertices, coord):
     return vertices.index(coord)
@@ -104,23 +109,23 @@ def marcar_camino(matrix, path):
 
 n = int(input("Inserte el número de matriz: "))
 
-matrix = generate_empty_matrix(n)
+matrix = generar_empty_matrix(n)
 imprimir_cuadricula(matrix)
 
 insertar_obstaculos(matrix)
 inicio, fin = insertar_inicio_fin(matrix)
 imprimir_cuadricula(matrix)
 
-vertices, edges = obtener_vertices_edges(matrix)
+vertices, aristas = obtener_vertices_aristas(matrix)
 num_vertices = len(vertices)
 
-edges = [(convertir_a_indice(vertices, edge[0]), convertir_a_indice(vertices, edge[1])) for edge in edges]
-graph = generate_matrix(num_vertices, edges)
+aristas = [(convertir_a_indice(vertices, arista[0]), convertir_a_indice(vertices, arista[1])) for arista in aristas]
+grafo = generar_matrix(num_vertices, aristas)
 
 inicio_idx = convertir_a_indice(vertices, inicio)
 fin_idx = convertir_a_indice(vertices, fin)
 
-distances, predecessor = dijkstra(num_vertices, graph, inicio_idx)
+distancias, predecessor = dijkstra(num_vertices, grafo, inicio_idx)
 
 # Obtener el camino más corto
 path_indices = get_shortest_path(predecessor, inicio_idx, fin_idx)
